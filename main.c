@@ -202,14 +202,26 @@ int main(void)
 	// Initialize the UART0 using uartstdio
     UARTStdioConfig(0, 115200, 16000000);
 
-    uint32_t ADCValues[1];
+    uint32_t ADCValues0[1];
+    uint32_t ADCValues1[1];
+    uint32_t ADCValues2[1];
     uint32_t TempValueC;
     uint32_t TempValueF;
 
-    ADCSequenceConfigure(ADC0_BASE, 3, ADC_TRIGGER_PROCESSOR, 0);
-    ADCSequenceStepConfigure(ADC0_BASE, 3, 0, ADC_CTL_TS | ADC_CTL_IE | ADC_CTL_END);
-    ADCSequenceEnable(ADC0_BASE, 3);
-    ADCIntClear(ADC0_BASE, 3);
+    ADCSequenceConfigure(ADC0_BASE, 0, ADC_TRIGGER_PROCESSOR, 0);
+    ADCSequenceStepConfigure(ADC0_BASE, 0, 0, ADC_CTL_TS | ADC_CTL_IE | ADC_CTL_END);
+    ADCSequenceEnable(ADC0_BASE, 0);
+    ADCIntClear(ADC0_BASE, 0);
+
+    ADCSequenceConfigure(ADC0_BASE, 1, ADC_TRIGGER_PROCESSOR, 0);
+    ADCSequenceStepConfigure(ADC0_BASE, 1, 0, ADC_CTL_TS | ADC_CTL_IE | ADC_CTL_END);
+    ADCSequenceEnable(ADC0_BASE, 1);
+    ADCIntClear(ADC0_BASE, 1);
+
+    ADCSequenceConfigure(ADC0_BASE, 2, ADC_TRIGGER_PROCESSOR, 0);
+    ADCSequenceStepConfigure(ADC0_BASE, 2, 0, ADC_CTL_TS | ADC_CTL_IE | ADC_CTL_END);
+    ADCSequenceEnable(ADC0_BASE, 2);
+    ADCIntClear(ADC0_BASE, 2);
 
   	while(1)
 	{
@@ -235,14 +247,28 @@ int main(void)
 		{
 			g_bTimer1Flag = 0;		// Clear Timer 1 flag
 
-			ADCProcessorTrigger(ADC0_BASE, 3);
-			while(!ADCIntStatus(ADC0_BASE, 3, false))
+			ADCProcessorTrigger(ADC0_BASE, 0);
+			while(!ADCIntStatus(ADC0_BASE, 0, false))
 			{
 			}
-			ADCIntClear(ADC0_BASE, 3);
-			ADCSequenceDataGet(ADC0_BASE, 3, ADCValues);
+			ADCIntClear(ADC0_BASE, 0);
+			ADCSequenceDataGet(ADC0_BASE, 0, ADCValues0);
 
-			TempValueC = (uint32_t)(147.5 - ((75.0*3.3 *(float)ADCValues[0])) / 4096.0);
+			ADCProcessorTrigger(ADC0_BASE, 1);
+			while(!ADCIntStatus(ADC0_BASE, 1, false))
+			{
+			}
+			ADCIntClear(ADC0_BASE, 1);
+			ADCSequenceDataGet(ADC0_BASE, 1, ADCValues2);
+
+			ADCProcessorTrigger(ADC0_BASE, 2);
+			while(!ADCIntStatus(ADC0_BASE, 2, false))
+			{
+			}
+			ADCIntClear(ADC0_BASE, 2);
+			ADCSequenceDataGet(ADC0_BASE, 2, ADCValues2);
+
+			TempValueC = (uint32_t)(147.5 - ((75.0*3.3 *(float)ADCValues2[0])) / 4096.0);
 			TempValueF = ((TempValueC * 9) + 160) / 5;
 			UARTprintf("Temperature = %3d*C or %3d*F\r", TempValueC, TempValueF);
 		}
