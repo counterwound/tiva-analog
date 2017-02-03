@@ -209,12 +209,12 @@ int main(void)
     uint32_t TempValueF;
 
     ADCSequenceConfigure(ADC0_BASE, 0, ADC_TRIGGER_PROCESSOR, 0);
-    ADCSequenceStepConfigure(ADC0_BASE, 0, 0, ADC_CTL_TS | ADC_CTL_IE | ADC_CTL_END);
+    ADCSequenceStepConfigure(ADC0_BASE, 0, 0, ADC_CTL_CH0 |ADC_CTL_IE | ADC_CTL_END);
     ADCSequenceEnable(ADC0_BASE, 0);
     ADCIntClear(ADC0_BASE, 0);
 
     ADCSequenceConfigure(ADC0_BASE, 1, ADC_TRIGGER_PROCESSOR, 0);
-    ADCSequenceStepConfigure(ADC0_BASE, 1, 0, ADC_CTL_TS | ADC_CTL_IE | ADC_CTL_END);
+    ADCSequenceStepConfigure(ADC0_BASE, 1, 0, ADC_CTL_CH6 |ADC_CTL_IE | ADC_CTL_END);
     ADCSequenceEnable(ADC0_BASE, 1);
     ADCIntClear(ADC0_BASE, 1);
 
@@ -254,12 +254,16 @@ int main(void)
 			ADCIntClear(ADC0_BASE, 0);
 			ADCSequenceDataGet(ADC0_BASE, 0, ADCValues0);
 
+			UARTprintf("Zero = %3d\n", (uint32_t)ADCValues0[0]);
+
 			ADCProcessorTrigger(ADC0_BASE, 1);
 			while(!ADCIntStatus(ADC0_BASE, 1, false))
 			{
 			}
 			ADCIntClear(ADC0_BASE, 1);
-			ADCSequenceDataGet(ADC0_BASE, 1, ADCValues2);
+			ADCSequenceDataGet(ADC0_BASE, 1, ADCValues1);
+
+			UARTprintf("One  = %3d\n", (uint32_t)ADCValues1[0]);
 
 			ADCProcessorTrigger(ADC0_BASE, 2);
 			while(!ADCIntStatus(ADC0_BASE, 2, false))
@@ -270,7 +274,7 @@ int main(void)
 
 			TempValueC = (uint32_t)(147.5 - ((75.0*3.3 *(float)ADCValues2[0])) / 4096.0);
 			TempValueF = ((TempValueC * 9) + 160) / 5;
-			UARTprintf("Temperature = %3d*C or %3d*F\r", TempValueC, TempValueF);
+			UARTprintf("Temperature = %3d*C or %3d*F\n\r", TempValueC, TempValueF);
 		}
 	}
 }
