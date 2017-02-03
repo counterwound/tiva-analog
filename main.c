@@ -28,6 +28,8 @@
 #include "driverlib/pin_map.h"
 #include "driverlib/sysctl.h"
 #include "driverlib/timer.h"
+#include "driverlib/uart.h"
+#include "utils/uartstdio.h"
 
 //*****************************************************************************
 // Ports Setup
@@ -39,16 +41,17 @@ void PortFunctionInit(void)
     // Enable Peripheral Clocks
     //
     SysCtlPeripheralEnable(SYSCTL_PERIPH_ADC0);
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_ADC1);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_UART0);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOD);
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE);
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
 
     //
-    // Enable pin PB4 for ADC AIN10
+    // Enable pin PE5 for ADC AIN8
     //
-    GPIOPinTypeADC(GPIO_PORTB_BASE, GPIO_PIN_4);
+    GPIOPinTypeADC(GPIO_PORTE_BASE, GPIO_PIN_5);
 
     //
     // Enable pin PD1 for ADC AIN6
@@ -56,9 +59,19 @@ void PortFunctionInit(void)
     GPIOPinTypeADC(GPIO_PORTD_BASE, GPIO_PIN_1);
 
     //
-    // Enable pin PE5 for ADC AIN8
+    // Enable pin PB4 for ADC AIN10
     //
-    GPIOPinTypeADC(GPIO_PORTE_BASE, GPIO_PIN_5);
+    GPIOPinTypeADC(GPIO_PORTB_BASE, GPIO_PIN_4);
+
+    //
+    // Enable pin PE2 for ADC AIN1
+    //
+    GPIOPinTypeADC(GPIO_PORTE_BASE, GPIO_PIN_2);
+
+    //
+    // Enable pin PE1 for ADC AIN2
+    //
+    GPIOPinTypeADC(GPIO_PORTE_BASE, GPIO_PIN_1);
 
     //
     // Enable pin PD3 for ADC AIN4
@@ -71,24 +84,9 @@ void PortFunctionInit(void)
     GPIOPinTypeADC(GPIO_PORTD_BASE, GPIO_PIN_0);
 
     //
-    // Enable pin PD2 for ADC AIN5
+    // Enable pin PE3 for ADC AIN0
     //
-    GPIOPinTypeADC(GPIO_PORTD_BASE, GPIO_PIN_2);
-
-    //
-    // Enable pin PE1 for ADC AIN2
-    //
-    GPIOPinTypeADC(GPIO_PORTE_BASE, GPIO_PIN_1);
-
-    //
-    // Enable pin PE2 for ADC AIN1
-    //
-    GPIOPinTypeADC(GPIO_PORTE_BASE, GPIO_PIN_2);
-
-    //
-    // Enable pin PB5 for ADC AIN11
-    //
-    GPIOPinTypeADC(GPIO_PORTB_BASE, GPIO_PIN_5);
+    GPIOPinTypeADC(GPIO_PORTE_BASE, GPIO_PIN_3);
 
     //
     // Enable pin PE0 for ADC AIN3
@@ -96,9 +94,9 @@ void PortFunctionInit(void)
     GPIOPinTypeADC(GPIO_PORTE_BASE, GPIO_PIN_0);
 
     //
-    // Enable pin PE3 for ADC AIN0
+    // Enable pin PD2 for ADC AIN5
     //
-    GPIOPinTypeADC(GPIO_PORTE_BASE, GPIO_PIN_3);
+    GPIOPinTypeADC(GPIO_PORTD_BASE, GPIO_PIN_2);
 
     //
     // Enable pin PE4 for ADC AIN9
@@ -106,9 +104,26 @@ void PortFunctionInit(void)
     GPIOPinTypeADC(GPIO_PORTE_BASE, GPIO_PIN_4);
 
     //
+    // Enable pin PB5 for ADC AIN11
+    //
+    GPIOPinTypeADC(GPIO_PORTB_BASE, GPIO_PIN_5);
+
+    //
     // Enable pin PF2 for GPIOOutput
     //
     GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_2);
+
+    //
+    // Enable pin PA0 for UART0 U0RX
+    //
+    GPIOPinConfigure(GPIO_PA0_U0RX);
+    GPIOPinTypeUART(GPIO_PORTA_BASE, GPIO_PIN_0);
+
+    //
+    // Enable pin PA1 for UART0 U0TX
+    //
+    GPIOPinConfigure(GPIO_PA1_U0TX);
+    GPIOPinTypeUART(GPIO_PORTA_BASE, GPIO_PIN_1);
 }
 
 //*****************************************************************************
@@ -181,7 +196,11 @@ int main(void)
     ConfigureTimers();
     ConfigureInterrupts();
 
-	GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, GPIO_PIN_2); //blink LED
+	// Use the internal 16MHz oscillator as the UART clock source.
+	UARTClockSourceSet(UART0_BASE, UART_CLOCK_PIOSC);
+
+	// Initialize the UART0 using uartstdio
+    UARTStdioConfig(0, 115200, 16000000);
 
 	while(1)
 	{
